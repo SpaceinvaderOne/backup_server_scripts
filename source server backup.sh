@@ -50,7 +50,7 @@ shallicontinue () {
 
 vmcheck () {
 echo "Checking if VM is running"
-vmstate=$(virsh list --all | grep " $vm " | awk '{ print $3}')
+vmstate=$(virsh list --all | grep " $vm " | awk '{ print $NF}')
 if [ "$vmstate" == "x" ] || [ "$vmstate" != "running" ]
 then
     echo "VM is not running, so source server will shut down after sync"
