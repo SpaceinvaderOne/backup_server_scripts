@@ -5,7 +5,7 @@ umask 0000
 
 ############# Basic settings ##############################################################
 # these must be set
-remotelocation="/mnt/remotes/prime/appdata/backupserver" # set remote mounted location
+mountlocation="/mnt/remotes/prime"         # set remote mounted location (make sure NOT to have a  / on end)
 
 sourcelocation1="/mnt/remotes/prime/Movies/"    # set first source directory to sync
 backuplocation1="/mnt/user/Movies/"             # destination location for above
@@ -19,6 +19,9 @@ backuplocation2="/mnt/user/TV Shows/"           # destination location for above
 # backuplocation3="xxxxxxxxxxxxxxxx"            # destination location for above
 # sourcelocation4="xxxxxxxxxxxxxxxx"            # set fourth source directory to sync
 # backuplocation4="xxxxxxxxxxxxxxxx"            # destination location for above
+
+
+remotelocation="$mountlocation"/appdata/backupserver  # do not change
 
 ############# Basic functions ##############################################################
 
@@ -37,7 +40,7 @@ rsync -avhP --delete "$sourcelocation2" "$backuplocation2"    # second location 
 shutdownstatus () {
 if [ -d $remotelocation/backupoff ] ; then
 poweroff="backup"
-containerstart="no"
+containerstart="no" 
 rm -r $remotelocation/backupoff
 elif [ -d $remotelocation/sourceoff ] ; then
 poweroff="source"
@@ -100,16 +103,14 @@ rsync -avhP --delete   "$dockerbackup1" "$dockersource1" # first appdata to sync
 # rsync -avhP --delete "$dockersource3" "$dockerbackup3"   # third appdata to sync
 # rsync -avhP --delete "$dockersource4" "$dockerbackup4"  # forth appdata to sync
 # add additional locations if needed
-fi
-}
 
-startcontainers () {
-if [ "$containerstart" == "yes"  ] ; then
+# start containers
 docker start EmbyServerBeta # change container to startup to suit
 docker start swag
 # add other conatiners to suit
 fi
 }
+
 
 ############# Start process ###################################################################
 
@@ -120,7 +121,6 @@ shutdownstatus
 syncdata
 copyappdata
 completiontune
-startcontainers
 endandshutdown
 
 else
