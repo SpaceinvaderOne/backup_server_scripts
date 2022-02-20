@@ -18,6 +18,7 @@ mkdir -p /mnt/user/appdata/backupserver/start ; echo "Making directory in appdat
 if [ "$poweroff" == "backup"  ] ; then
 mkdir -p /mnt/user/appdata/backupserver/backupoff
 echo "Backup server has been set to turn off after sync"
+containerstart="no" #set continer start to no as backup server will shutdown
 elif [ "$poweroff" == "source"  ] ; then
 vmcheck
 else
