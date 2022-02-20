@@ -6,7 +6,7 @@ Once the backup server has started it will sync the user selected shares/folders
 
 Once the sync has been completed various actions can be done.
 
-1. The backup server can be shut down after the sync has completed. This is useful if you want to have a backup server only running when needed for the backup job. This saves both electricity and wear and tear on the backup server's hard disks.
+1. The backup server can be automatically shut down after the sync has completed. This is useful if you want to have a backup server only running when needed for the backup job. This saves both electricity and wear and tear on the backup server's hard disks.
 
 2. The source server can be shutdown after the sync has completed. 
 After the source server has shut down the backup server if enabled can start a docker container. This is useful for 2 media servers for example running Emby. For example the media can be synced from the source to the backup server. Also the Emby appdata or database can be synced from source server to backup server. Then the synced Emby container automatically started on the Backup server 
