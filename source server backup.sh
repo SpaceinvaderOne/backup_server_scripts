@@ -19,8 +19,7 @@ if [ "$poweroff" == "backup"  ] ; then
 mkdir -p /mnt/user/appdata/backupserver/backupoff
 echo "Backup server has been set to turn off after sync"
 elif [ "$poweroff" == "source"  ] ; then
-mkdir -p /mnt/user/appdata/backupserver/sourceoff
-echo "Source server has been set to turn off after sync"
+vmcheck
 else
 echo "Neither Source nor Backup server is set to be turned off"
 fi
@@ -49,11 +48,12 @@ shallicontinue () {
 }
 
 vmcheck () {
-echo "Checking if VM is running"
+echo "Source server was set to shutdown so checking if VM is running"
 vmstate=$(virsh list --all | grep " $vm " | awk '{ print $NF}')
 if [ "$vmstate" != "running" ]
 then
     echo "VM is not running, so source server will shut down after sync"
+    mkdir -p /mnt/user/appdata/backupserver/sourceoff
 else
     echo "VM is running so source server will not shut down after sync"
     echo "Setting shutdown state to neither source or backup to shutdown after sync"
@@ -130,7 +130,6 @@ fi
 ############################## start process ###################################
 if [ "$startserver" == "smartplug" ] ; then
 shallicontinue
-vmcheck
 setup
 smartplugoff
 sleep 5
@@ -138,7 +137,6 @@ smartplugon
 backupserverstatus
 else
 shallicontinue
-vmcheck
 setup
 wakeonlan
 backupserverstatus
