@@ -7,10 +7,13 @@ backupmacaddress="xx:xx:xx:xx:xx:xx" # set macaddress of backup servers' NIC (if
 backupip="10.10.20.197"   # set ip address of the backup server
 poweroff="backup"  # set to shutdown source server, backup server or neither server after sync --  "none" "both" "source" "backup"
 containerstart="yes" # set to "yes or "no" to tell backup server to start selected containers on backup server after sync (if poweroff set to backup then this is ignored)
-vm1="vm1"  # if this vm is running and poweroff is set to 'source' then poweroff will be set to none so source server doesnt shut down
-vm2="vm2"  # if this vm is running and poweroff is set to 'source' then poweroff will be set to none so source server doesnt shut down
-vm3="vm3"  # if this vm is running and poweroff is set to 'source' then poweroff will be set to none so source server doesnt shut down
+
+# Vms list below will be checked for and if found running source server will not shutdown if set to
+declare -a vms=("null" "null") # put each vm name for script to check if tunning in quotes ie vms=("PopOS" "Wondows 10")
 continueifvmsrunning="no"  # If "yes" copy will continue but main server will not shutdown and backup server shutdown aftwards instead. If "no" backup server will not start and copy process not continue
+
+#Containers to shutdown before copy (normally used if server is switching servers ie emby/plex )
+declare -a containerstop=("null" "null") # put each container name in quotes ie containerstop=("EmbyServerBeta" "swag")
 
 ############################# functions ########################################
 
@@ -54,13 +57,17 @@ if [ "$poweroff" == "backup"  ] ; then
 mkdir -p /mnt/user/appdata/backupserver/backupoff
 echo "Backup server has been set to turn off after sync"
 containerstart="no" #set continer start to no as backup server will shutdown
+stopcontainers="no"
 elif [ "$poweroff" == "source"  ] ; then
 mkdir -p /mnt/user/appdata/backupserver/sourceoff
+stopcontainers="yes"
 else
 echo "Neither Source nor Backup server is set to be turned off"
+stopcontainers="no"
 fi
 if [ "$containerstart" == "yes"  ] ; then
 mkdir -p /mnt/user/appdata/backupserver/containerstart
+stopcontainers="yes"
 echo "Containers are set to start on Backup server after sync completed"
 else
 echo "No containers on Backup server are set to start after sync had completed"
@@ -77,7 +84,7 @@ etherwake -b $backupmacaddress
 
 vmcheck () {
 echo "Checking if specified VMs are running"
-for vmval in "$vm1" "$vm2" "$vm3"
+for vmval in "${vms[@]}"
 do
 vmstate=$(virsh list --all | grep " $vmval " | awk '{ print $NF}')
 if [ "$vmstate" != "running" ]
@@ -88,6 +95,21 @@ else
     vmrunning="true"
 fi
 done
+
+}
+
+shutdowncontainers() {
+if [ "$containerstop" = "null"  ] ; then
+stopcontainers="no"
+fi
+if [ "$stopcontainers" == "yes"  ] ; then
+for contval in "${containerstop[@]}"
+do
+   echo "Stopping source server container ....." 
+   docker stop "$contval"
+   echo 
+done
+fi
 
 }
 
@@ -104,6 +126,7 @@ do
   sleep 30  # wait 30 seconds before rechecking
 done
 echo "Okay server is now on, backup process should start from the backup server side"
+shutdowncontainers
 
 if [ "$poweroff" == "backup"  ] ; then
 checkbackup=1
