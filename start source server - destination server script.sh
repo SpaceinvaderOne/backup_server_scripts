@@ -71,7 +71,7 @@ startupcontainerssource() {
 for contval in "${container_start_stop[@]}"
 do
    echo "Restarting specified containers on source server now appdata is synced ....." 
-   ssh "$HOST" docker stop "$contval"
+   ssh "$HOST" docker start "$contval"
    echo 
 done
 
