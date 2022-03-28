@@ -3,8 +3,10 @@ umask 0000
 
 startbackup="etherwake"   	 # set to choose method used to start backup server: "etherwake" (wake on lan), "ipmi" (for IPMI capable servers) or "smartplug" tasmota smart switch 
 startsource="etherwake"   	 # set to choose method used to start backup server: "etherwake" (wake on lan), "ipmi" (for IPMI capable servers) or "smartplug" tasmota smart switch
-ipmiadminuser="admin"     	 # used for IPMI capable servers - admin user
-ipmiadminpassword="password" # used for IPMI capable servers - admin user
+source_ipmiadminuser="admin"     	 # used for IPMI capable servers - admin user for source server
+source_ipmiadminpassword="password" # used for IPMI capable servers - admin user  for source server
+dest_ipmiadminuser="admin"     	 # used for IPMI capable servers - admin user for destination/backup server
+dest_ipmiadminpassword="password" # used for IPMI capable servers - admin user for destination/backup server
 backup_smartplug_ip="http://xxx.xxx.xxx.xxx" # set ip address of tasmota smart plug - ignored if start server set to etherwake
 source_smartplug_ip="http://xxx.xxx.xxx.xxx" # set ip address of tasmota smart plug - ignored if start server set to etherwake
 
@@ -275,8 +277,14 @@ echo "destination_server_ip=\"$destination_server_ip\"" | sudo tee  --append $CO
 echo "poweroff=\"$poweroff\"" | sudo tee  --append $CONFI
 echo "startbackup=\"$startbackup\"" | sudo tee  --append $CONFI
 echo "startsource=\"$startsource\"" | sudo tee  --append $CONFI
+
 echo "backup_smartplug_ip=\"$backup_smartplug_ip\"" | sudo tee  --append $CONFI
 echo "source_smartplug_ip=\"$source_smartplug_ip\"" | sudo tee  --append $CONFI
+echo "source_ipmiadminuser=\"$source_ipmiadminuser\"" | sudo tee  --append $CONFI
+echo "source_ipmiadminpassword=\"$source_ipmiadminpassword\"" | sudo tee  --append $CONFI
+echo "dest_ipmiadminuser=\"$dest_ipmiadminuser\"" | sudo tee  --append $CONFI
+echo "dest_ipmiadminpassword=\"$dest_ipmiadminpassword\"" | sudo tee  --append $CONFI
+
 echo "sourcemacaddress=\"$sourcemacaddress\"" | sudo tee  --append $CONFI
 echo "backupmacaddress=\"$backupmacaddress\"" | sudo tee  --append $CONFI
 echo "copyappdata=\"$copyappdata\"" | sudo tee  --append $CONFI
