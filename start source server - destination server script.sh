@@ -227,7 +227,7 @@ fi
 
 ipmi_on () {
 if [ "$startsource" == "ipmi" ] ; then
-ipmitool -I lan -H "$source_server_ip" -U "$ipmiadminuser" -P "$ipmiadminpassword" chassis power on
+ipmitool -I lan -H "$source_server_ip" -U "$source_ipmiadminuser" -P "$source_ipmiadminpassword" chassis power on
 fi
 }
 
