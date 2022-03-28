@@ -1,8 +1,10 @@
 #!/bin/bash
 umask 0000
 
-startbackup="etherwake"   # set to choose method used to start backup server: "etherwake" (wake on lan) or "smartplug" tasmota smart switch
-startsource="etherwake"   # set to choose method used to start backup server: "etherwake" (wake on lan) or "smartplug" tasmota smart switch
+startbackup="etherwake"   	 # set to choose method used to start backup server: "etherwake" (wake on lan), "ipmi" (for IPMI capable servers) or "smartplug" tasmota smart switch 
+startsource="etherwake"   	 # set to choose method used to start backup server: "etherwake" (wake on lan), "ipmi" (for IPMI capable servers) or "smartplug" tasmota smart switch
+ipmiadminuser="admin"     	 # used for IPMI capable servers - admin user
+ipmiadminpassword="password" # used for IPMI capable servers - admin user
 backup_smartplug_ip="http://xxx.xxx.xxx.xxx" # set ip address of tasmota smart plug - ignored if start server set to etherwake
 source_smartplug_ip="http://xxx.xxx.xxx.xxx" # set ip address of tasmota smart plug - ignored if start server set to etherwake
 
@@ -214,6 +216,13 @@ etherwake -b $backupmacaddress
 
 ######################################
 
+ipmi_on () {
+ipmitool -I lan -H "$destination_server_ip" -U "$ipmiadminuser" -P "$ipmiadminpassword" chassis power on
+}
+
+
+######################################
+
 writeconfig () {
 echo
 echo "Writing config file" 
@@ -293,6 +302,13 @@ smartplugon
 echo "Writing config file" 
 writeconfig  >/dev/null
 backupserverstatus 
+elif [ "$startbackup" == "ipmi" ] ; then
+shallicontinue 
+setup
+ipmi_on
+echo "Writing config file"
+writeconfig 
+backupserverstatus
 else
 shallicontinue 
 setup
