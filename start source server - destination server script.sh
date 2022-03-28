@@ -223,6 +223,15 @@ curl "$source_smartplug_ip"/cm?cmnd=Power%20On  > /dev/null 2>&1 #turn on power 
 fi
 }
 
+#################
+
+ipmi_on () {
+if [ "$startsource" == "ipmi" ] ; then
+ipmitool -I lan -H "$source_server_ip" -U "$ipmiadminuser" -P "$ipmiadminpassword" chassis power on
+fi
+}
+
+
 ################# 
 sync2source () {
 syncmaindata
@@ -233,6 +242,7 @@ syncappdata
 readconfig
 shallicontinue
 wakeonlan
+ipmi_on
 smartplugoff
 sleep 5
 smartplugon
@@ -243,4 +253,3 @@ rsync -avhsP  "$logname" "$HOST":"$logname" >/dev/null
 rm "$logname"
 poweroff # shutdown server
 exit
-
