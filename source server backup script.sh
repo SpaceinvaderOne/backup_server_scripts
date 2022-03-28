@@ -219,7 +219,7 @@ etherwake -b $backupmacaddress
 ######################################
 
 ipmi_on () {
-ipmitool -I lan -H "$destination_server_ip" -U "$ipmiadminuser" -P "$ipmiadminpassword" chassis power on
+ipmitool -I lan -H "$destination_server_ip" -U "$dest_ipmiadminuser" -P "$dest_ipmiadminpassword" chassis power on
 }
 
 
