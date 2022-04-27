@@ -1,11 +1,12 @@
 #!/bin/bash
+# start source server script -- needs source server script and destination server script to work  
 umask 0000
-
+############# variables ##############################################
 CONFI="/mnt/user/appdata/backupserver/config.cfg" # dont change
+############# other variables set in source server script  ###########
 
 
-############################# functions ########################################
-
+############################# functions ##############################
 
 readconfig () { 
 source "$CONFI"
@@ -230,7 +231,6 @@ if [ "$startsource" == "ipmi" ] ; then
 ipmitool -I lan -H "$source_server_ip" -U "$source_ipmiadminuser" -P "$source_ipmiadminpassword" chassis power on
 fi
 }
-
 
 ################# 
 sync2source () {
