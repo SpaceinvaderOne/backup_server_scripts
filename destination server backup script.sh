@@ -1,25 +1,46 @@
 #!/bin/bash
 # backup server script -- needs source server script setup on source server to work
 umask 0000
-############# Basic settings ##############################################################
-source_server_ip="192.168.1.100" # set to the ip of the source server
+############# Basic settings ##########################################################
+source_server_ip="192.168.1.10" # set to the ip of the source server
 forcestart="no"  # default is "no" - set to yes to force process to run even if source server didn't request
 
-
+############# advanced/optional settings ##############################################
+checkandstart="no" # default is "no" - set to yes for script to start below containers if main server is NOT running
+declare -a container_start=("EmbyServerBeta" "swag") # put each container name in quotes ie container_start_stop=("EmbyServerBeta" "swag")
+##
 HOST="root@""$source_server_ip" # dont change
-CONFI="/mnt/user/appdata/backupserver/config.cfg" # dont change
+CONFI="/mnt/user/appdata/backupserver/" # dont change
 
 #############  Functions ##############################################################
 
-# read config file written by source server and set other variables
-readconfig () {
-mkdir -p /mnt/user/appdata/backupserver/
-rsync -avhsP  "$HOST":"$CONFI" "$CONFI" 
-source "$CONFI"
+Check_Source_Server () {
+ping $source_server_ip -c3 > /dev/null 2>&1 ; yes=$? ; #ping source server 3 times to check for reply
+  if [ ! $yes == 0 ] ;then
+  sourceserverstatus="off"
+  else
+  sourceserverstatus="on"
+fi
+
+# check if containers should be started if source server is not running
+if [ "$sourceserverstatus" == "off" ] && [ "$checkandstart" == "yes" ]; then
+echo "Source server is off. I will start selected containers"
+startcontainers_if_main_off
+exit
+fi
+if [ "$sourceserverstatus" == "off" ]; then
+echo "Source server is off. Exiting"
+exit
+else
+# read config file written by source server to set variables
+mkdir -p "$CONFI"
+rsync -avhsP  "$HOST":"$CONFI" "$CONFI" ||  start="no";
+source "$CONFI"config.cfg
 ssh "$HOST" [[ -f /mnt/user/appdata/backupserver/start ]] && start="yes" ||  start="no";
+fi
 }
 
-#####################
+#######################################################################################
 
 # sync data from source server to backup server
 syncmaindata () {
@@ -56,7 +77,7 @@ fi
 fi
 }
 
-#####################
+#######################################################################################
 
 syncappdata () {
 if [ "$copyappdata" == "yes"  ] ; then
@@ -95,7 +116,7 @@ startupcontainers
 fi
 }
 
-#####################
+#######################################################################################
 
 # this function cleans up and exits script shutting down server if that has been set
 endandshutdown () {
@@ -117,14 +138,14 @@ ssh "$HOST" 'rm /mnt/user/appdata/backupserver/start'
 
 }
 
-#####################
+#######################################################################################
 
 # this function plays completion tune when sync finished (will not work without beep speaker)
 completiontune () {
 beep -l 600 -f 329.627556913 -n -l 400 -f 493.883301256 -n -l 200 -f 329.627556913 -n -l 200 -f 493.883301256 -n -l 200 -f 659.255113826 -n -l 600 -f 329.627556913 -n -l 400 -f 493.883301256 -n -l 200 -f 329.627556913 -n -l 200 -f 493.883301256 -n -l 200 -f 659.255113826 -n -l 600 -f 329.627556913 -n -l 360 -f 493.883301256 -n -l 200 -f 329.627556913 -n -l 200 -f 493.883301256 -n -l 640 -f 659.255113826 -n -l 160 -f 622.253967444 -n -l 200 -f 329.627556913 -n -l 200 -f 554.365261954 -n -l 200 -f 329.627556913 -n -l 200 -f 622.253967444 -n -l 200 -f 493.883301256 -n -l 200 -f 830.60939516 -n -l 200 -f 415.30469758 -n -l 80 -f 739.988845423 -n -l 40 -f 783.990871963 -n -l 80 -f 739.988845423 -n -l 200 -f 415.30469758 -n -l 200 -f 659.255113826 -n -l 200 -f 622.253967444 -n -l 400 -f 554.365261954 -n -l 1320 -f 415.30469758 -n -l 40 -f 7458.62018429 -n -l 40 -f 7040.0 -n -l 40 -f 4186.00904481 -n -l 40 -f 3729.31009214 -n -l 40 -f 6644.87516128 -n -l 40 -f 7902.1328201 -n -l 40 -f 16.3515978313 -n -l 200 -f 830.60939516 -n -l 200 -f 415.30469758 -n -l 40 -f 739.988845423 -n -l 80 -f 783.990871963 -n -l 80 -f 739.988845423 -n -l 200 -f 415.30469758 -n -l 200 -f 659.255113826 -n -l 200 -f 622.253967444 -n -l 400 -f 554.365261954 -n -l 1320 -f 415.30469758 -n -l 40 -f 4698.63628668
 }
 
-#####################
+#######################################################################################
 
 startupcontainers() {
 
@@ -149,7 +170,7 @@ done
 fi
 }
 
-#####################
+#######################################################################################
 
 shutdowncontainerssource() {
 
@@ -162,7 +183,7 @@ done
 sleep 10
 }
 
-#####################
+#######################################################################################
 
 shutdowncontainersbackup() {
 
@@ -175,9 +196,19 @@ done
 sleep 10
 }
 
-#####################
+#######################################################################################
 
-mainfunction () {
+startcontainers_if_main_off() { 
+for contval in "${container_start[@]}"
+do
+   docker start "$contval"
+done
+}
+
+#######################################################################################
+
+Main_Sync_Function () {
+
 # check if main server started process by making start flag file, then start sync
 if [ "$start" == "yes" ] ; then
 syncmaindata 
@@ -185,21 +216,24 @@ syncappdata
 completiontune
 endandshutdown 
 
+# check if set to forcesync and if so, then start sync
 elif  [ "$forcestart" == "yes"  ] ; then
 syncmaindata 
 syncappdata 
 completiontune
 endandshutdown 
 
+
+# If source server didnt request sync then exit
 else
-echo "Source server didn't request sync job"
-echo "Normal start of backup server so exiting script"
+echo "Source server didn't start the backup server so sync job has not been requested"
+echo "Source server is " "$sourceserverstatus"
 exit
 fi
 }
 
-############# Start process ###################################################################
+############# Start process #############################################################
+Check_Source_Server
+Main_Sync_Function 2>&1 | ssh "$HOST" -T tee -a "$logname"
 
-readconfig
-mainfunction 2>&1 | ssh "$HOST" -T tee -a "$logname"
 exit
