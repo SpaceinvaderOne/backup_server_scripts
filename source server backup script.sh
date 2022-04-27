@@ -1,6 +1,8 @@
 #!/bin/bash
+# source server script -- needs destination server backup scrip on backupup server to work
 umask 0000
-
+############# Basic settings (these settings cover source and destination scripts    ########################
+############# Set auto server startup method for source and backup server         ###########################
 startbackup="etherwake"   	 # set to choose method used to start backup server: "etherwake" (wake on lan), "ipmi" (for IPMI capable servers) or "smartplug" tasmota smart switch 
 startsource="etherwake"   	 # set to choose method used to start backup server: "etherwake" (wake on lan), "ipmi" (for IPMI capable servers) or "smartplug" tasmota smart switch
 source_ipmiadminuser="admin"     	 # used for IPMI capable servers - admin user for source server
@@ -10,11 +12,13 @@ dest_ipmiadminpassword="password" # used for IPMI capable servers - admin user f
 backup_smartplug_ip="http://xxx.xxx.xxx.xxx" # set ip address of tasmota smart plug - ignored if start server set to etherwake
 source_smartplug_ip="http://xxx.xxx.xxx.xxx" # set ip address of tasmota smart plug - ignored if start server set to etherwake
 
+############# Set Ip and/or macaddresses for source and backup server      #################################
 sourcemacaddress="xx:xx:xx:xx:xx:xx"  # set macaddress of backup servers' NIC (if using etherwake) - ignored if using smartplug
 backupmacaddress="xx:xx:xx:xx:xx:xx"  # set macaddress of backup servers' NIC (if using etherwake) - ignored if using smartplug
 source_server_ip="192.168.1.100"       # set ip address of the sourceserver
 destination_server_ip="192.168.1.101"  # set ip address of the backup server
 
+############# Sync process setiings     ####################################################################
 poweroff="source"         # set to shutdown source server, backup server or neither server after sync --  "none" "both" "source" "backup"
 copymaindata="yes"        # set to copy main array data for selected shares/locations from the source server to the backup server
 copyappdata="yes"         # set to copy appdata for specific containers from the source server to the backup server
@@ -73,6 +77,8 @@ appdestination7=""
 appdestination8=""
 appdestination9=""
 
+
+############# advanced variables/settings ##############################################
 CONFI="/mnt/user/appdata/backupserver/config.cfg"  #dont change
 loglocation="/mnt/user/appdata/backupserver/logs/" #dont change
 
